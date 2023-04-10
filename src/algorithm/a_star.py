@@ -1,89 +1,71 @@
-import math
+from math import sqrt
 
-def convert(adj: dict):
-    return {k: {(v, w) for v, w in adj[k]} for k in adj}
+class Node:
+    def __init__(self, label, weight=0, x=0, y=0):
+        self.label = str(label)
+        self.weight = weight
+        self.x = x
+        self.y = y
+
+    def __eq__(self, other):
+        return self.label == other.label
+
+    def __repr__(self):
+        return f'{self.label}'
+
+    def __hash__(self):
+        return hash(self.label)
 
 
-def get_path(came_from, current):
+def build(matrix):
+    return {Node(i): [Node(j, matrix[i][j], i, j) for j in range(len(matrix[i])) if matrix[i][j] > 0] for i in range(len(matrix))}
+
+def retrace_path(came_from, current):
     path = [current]
     while current in came_from:
         current = came_from[current]
         path.append(current)
     return path[::-1]
 
-
 class Graph:
-    def __init__(self, adj_list, start, end):
-        if not isinstance(adj_list, dict):
-            adj_list = convert(adj_list)
-        self.adj_list = adj_list
-        self.start = start
-        self.end = end
+    def __init__(self, matrix, start, goal):
+        self.nodes = build(matrix)
+        self.start = Node(start)  # Start Node
+        self.goal = Node(goal)  # Goal Node
 
-    def set_start(self, start):
-        self.start = start
+        # Input validation
+        if self.start not in self.nodes:
+            raise Exception(f'Start node {self.start} not in graph')
+        if self.goal not in self.nodes:
+            raise Exception(f'Goal node {self.goal} not in graph')
 
-    def set_end(self, end):
-        self.end = end
-
-    def get_neighbors(self, v):
-        return self.adj_list[v]
-
-    def get_heuristic(self, v):
-        return math.sqrt((self.end[0] - v[0]) ** 2 + (self.end[1] - v[1]) ** 2)
+    def euclidean_distance(self, node):
+        return sqrt((node.x - self.goal.x) ** 2 + (node.y - self.goal.y) ** 2)
 
     def calculate(self):
-        open_set = {self.start}  # set of nodes to be evaluated
-        closed_set = set()  # set of nodes already evaluated
-        optimal_path = {self.start: 0}  # distance from start along optimal path
-        nav_map = {self.start: self.start}  # map of navigated nodes
+        open_set = {self.start}
+        came_from = {}
+        g_score = {self.start: 0}
+        f_score = {self.start: self.euclidean_distance(self.start)}
 
         while len(open_set) > 0:
-            current = None
-            for v in open_set:
-                if current is None or optimal_path[v] + self.get_heuristic(v) < optimal_path[current] + self.get_heuristic(current):
-                    current = v
-
-            if current is None:
-                break
-
-            if current == self.end:
-                path = []
-
-                while nav_map[current] != current:
-                    path.append(current)
-                    current = nav_map[current]
-
-                path.append(current)
-                return path[::-1]
-
-            for node, weight in self.get_neighbors(current):
-                if node not in open_set and node not in closed_set:
-                    open_set.add(node)
-                    nav_map[node] = current
-                    optimal_path[node] = optimal_path[current] + weight
-                else:
-                    if optimal_path[current] + weight < optimal_path[node]:
-                        optimal_path[node] = optimal_path[current] + weight
-                        nav_map[node] = current
-
-                        if node in closed_set:
-                            closed_set.remove(node)
-                            open_set.add(node)
-
+            current = min(open_set, key=lambda x: f_score[x])
+            if current == self.goal:
+                return retrace_path(came_from, current)
             open_set.remove(current)
-            closed_set.add(current)
-
+            for neighbor in self.nodes[current]:
+                tentative_g_score = g_score[current] + neighbor.weight
+                if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
+                    came_from[neighbor] = current
+                    g_score[neighbor] = tentative_g_score
+                    f_score[neighbor] = tentative_g_score + self.euclidean_distance(neighbor)
+                    if neighbor not in open_set:
+                        open_set.add(neighbor)
         return None
 
-
 if __name__ == '__main__':
-    matr = {
-        (0, 0): {((1, 0), 1), ((0, 1), 1)},
-        (0, 1): {((1, 1), 1), ((0, 0), 1)},
-        (1, 0): {((0, 0), 1), ((1, 1), 1)},
-        (1, 1): {((0, 1), 1), ((1, 0), 1)},
-    }
-    graph = Graph(matr, (0, 0), (1, 1))
+    with open('test.txt') as f:
+        adj_matrix = [[int(x) for x in line.split()] for line in f.readlines()]
+    graph = Graph(adj_matrix, 0, 7)
 
     print(graph.calculate())
