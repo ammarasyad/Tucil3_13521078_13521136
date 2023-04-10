@@ -41,7 +41,7 @@ class Graph:
         while len(open_set) > 0:
             current = None
             for v in open_set:
-                if current is None or nav_map[v] < nav_map[current]:
+                if current is None or optimal_path[v] + self.get_heuristic(v) < optimal_path[current] + self.get_heuristic(current):
                     current = v
 
             if current is None:
@@ -84,6 +84,6 @@ if __name__ == '__main__':
         (1, 0): {((0, 0), 1), ((1, 1), 1)},
         (1, 1): {((0, 1), 1), ((1, 0), 1)},
     }
-    graph = Graph(matr, (1, 0), (1, 0))
+    graph = Graph(matr, (0, 0), (1, 1))
 
     print(graph.calculate())
