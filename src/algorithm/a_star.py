@@ -51,7 +51,7 @@ class Graph:
         while len(open_set) > 0:
             current = min(open_set, key=lambda x: f_score[x])
             if current == self.goal:
-                return retrace_path(came_from, current)
+                return retrace_path(came_from, current), g_score[self.goal]
             open_set.remove(current)
             for neighbor in self.nodes[current]:
                 tentative_g_score = g_score[current] + neighbor.weight
