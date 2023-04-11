@@ -16,9 +16,7 @@ class UCS:
     def push_route(self, route):
         i = 0
         if len(self.queue) > 0:
-            while len(self.queue) > i:
-                if self.total_weight(self.queue[i]) > self.total_weight(route):
-                    break
+            while len(self.queue) > i and self.total_weight(self.queue[i]) < self.total_weight(route):
                 i += 1
 
         self.queue.insert(i, route)
