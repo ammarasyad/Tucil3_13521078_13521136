@@ -18,29 +18,41 @@ class UCS:
     
     def pushRoute(self, route):
         i = 0
-        while (self.totalWeight(self.matrix[i]) <= self.totalWeight(route)):
-            i += 1
+        if (len(self.queue) > 0):
+            while (len(self.queue) > i):
+                if (self.totalWeight(self.queue[i]) <= self.totalWeight(route)):
+                    i += 1
+                else:
+                    break
+                
         
         self.queue.insert(i, route)
         return
     
+    def checkNodeInRoute(self, route, node):
+        for n in route:
+            if n == node:
+                return True
+                
+        return False
+    
     def getNextNode(self, routeNow):
         lastNode = routeNow[-1]
-        nextNode = set()
+        nextNode = []
         edges = self.matrix[lastNode-1]
         
         i = 0
         for i in range(len(edges)):
-            if (edges[i] != 0):
-                nextNode.add(i+1)
+            if (edges[i] != 0 and not self.checkNodeInRoute(routeNow, i+1)):
+                nextNode.append(i+1)
         
-        return list(nextNode)
+        return nextNode
     
     def search(self, source, destination):
         self.queue.append([source])
-        
+        solution = []
         while(len(self.queue) > 0):
-            routeNow = self.queue.pop()
+            routeNow = self.queue.pop(0)
             
             if (routeNow[0] == source and routeNow[-1] == destination):
                 solution = routeNow
@@ -53,7 +65,7 @@ class UCS:
                 self.pushRoute(temp)
             
             
-        return solution
+        return solution, self.totalWeight(solution)
 
 
 if __name__ == '__main__':
