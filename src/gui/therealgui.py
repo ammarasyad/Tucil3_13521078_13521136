@@ -1,8 +1,12 @@
 import sys
+sys.path.append('../algorithm')
+
 import networkx as nx
 import matplotlib.pyplot as plt
 import plot
 import ucs
+import a_star
+
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPushButton, QFileDialog, QComboBox, QLabel
 from PyQt5 import uic
