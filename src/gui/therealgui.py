@@ -2,8 +2,9 @@ import sys
 import networkx as nx
 import matplotlib.pyplot as plt
 import plot
+import ucs
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPushButton, QFileDialog, QComboBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPushButton, QFileDialog, QComboBox, QLabel
 from PyQt5 import uic
 
 class MainWindow(QMainWindow):
@@ -31,12 +32,23 @@ class MainWindow(QMainWindow):
         
         #Save Image Button
         self.saveButton = self.findChild(QPushButton, "pushButton_3")
+        # TODO: Implement save image
         
         #Starting Box
         self.startingCombo = self.findChild(QComboBox, "comboBox")
         
         #Destination Box
         self.destinationCombo = self.findChild(QComboBox, "comboBox_2")
+        
+        #Search Route Button
+        self.searchButton = self.findChild(QPushButton, "pushButton_4")
+        self.searchButton.clicked.connect(self.searchRoute)
+        
+        #Route Solution Label
+        self.route = self.findChild(QLabel, "label_3")
+        
+        #Distance Solution Label
+        self.distance = self.findChild(QLabel, "label_4")
         
         # Add the Matplotlib canvas and button to the window
         layout = self.findChild(QVBoxLayout, "verticalLayout_6")
@@ -70,6 +82,22 @@ class MainWindow(QMainWindow):
         for node in nodes:
             self.startingCombo.addItem(str(node))
             self.destinationCombo.addItem(str(node))
+            
+    def searchRoute(self):
+        matrix = plot.parseFile(filename)
+        ucsearch = ucs.UCS(matrix)
+        routeSolution, distanceSolution = ucsearch.search(int(self.startingCombo.currentText()), int(self.destinationCombo.currentText()))
+        self.printSolution(routeSolution)
+        self.printDistance(distanceSolution)
+        
+    def printSolution(self, solution):
+        solStr = ""
+        for s in solution:
+            solStr += str(s) + " "
+        self.route.setText("Route: " + solStr)
+        
+    def printDistance(self, distance):
+        self.distance.setText("Distance: " + str(distance))
         
 if __name__ == "__main__":
     app = QApplication(sys.argv)
