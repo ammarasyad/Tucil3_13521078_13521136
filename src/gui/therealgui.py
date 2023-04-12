@@ -36,7 +36,7 @@ class MainWindow(QMainWindow):
         
         #Save Image Button
         self.saveButton = self.findChild(QPushButton, "pushButton_3")
-        # TODO: Implement save image
+        self.saveButton.clicked.connect(self.savePlot)
         
         #Starting Box
         self.startingCombo = self.findChild(QComboBox, "comboBox")
@@ -72,6 +72,14 @@ class MainWindow(QMainWindow):
         self.addNode(plot.getNode(graphMatrix))
         self.plot_graph()
         
+    def savePlot(self):
+        dialog = QFileDialog()
+        dialog.setDefaultSuffix('png')
+        file_name, _ = dialog.getSaveFileName(self, "Save Graph", "","PNG Image (*.png)")
+        
+        if file_name:
+            self.canvas.print_png(file_name)
+    
     def plot_graph(self):
         self.fig.clear()
         global pos
