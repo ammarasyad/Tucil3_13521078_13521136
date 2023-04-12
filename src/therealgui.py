@@ -5,11 +5,11 @@ from PyQt5.QtCore import Qt
 import networkx as nx
 import matplotlib.pyplot as plt
 import plot
-import src.algorithm.ucs as ucs
-import src.algorithm.a_star as a_star
+import ucs
+import a_star
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from PyQt5.QtWidgets import QApplication, QDialog, QMainWindow, QVBoxLayout, QWidget, QPushButton, QFileDialog, QComboBox, QLabel
+from PyQt5.QtWidgets import QApplication, QDialog, QMainWindow, QVBoxLayout, QPushButton, QFileDialog, QComboBox, QLabel
 from PyQt5 import uic
 
 class ErrorDialog(QDialog):
@@ -140,7 +140,7 @@ class MainWindow(QMainWindow):
                 getRoute = True
         else:
             #Search Solution with A*
-            graph = a_star.Graph(matrix, int(self.startingCombo.currentText())-1, int(self.destinationCombo.currentText())-1)
+            graph = a_star.Graph(matrix, int(self.startingCombo.currentText()) - 1, int(self.destinationCombo.currentText()) - 1)
             if graph.calculate() != None:
                 arouteSolution, distanceSolution = graph.calculate()
                 getRoute = True
