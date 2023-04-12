@@ -19,7 +19,7 @@ class ErrorDialog(QDialog):
         super().__init__()
         self.setWindowTitle("Error")
         self.setWindowTitle("Error")
-        self.setFixedSize(300, 50)
+        self.setFixedSize(300, 180)
         self.layout = QVBoxLayout()
 
         message = QLabel("Error: " + str(e))
@@ -65,6 +65,9 @@ class MainWindow(QMainWindow):
         #Destination Box
         self.destinationCombo = self.findChild(QComboBox, "comboBox_2")
         
+        #Algorithm Box
+        self.algorithmCombo = self.findChild(QComboBox, "comboBox_3")
+        
         #Search Route Button
         self.searchButton = self.findChild(QPushButton, "pushButton_4")
         self.searchButton.clicked.connect(self.searchRoute)
@@ -93,8 +96,9 @@ class MainWindow(QMainWindow):
         except Exception as e:
             ErrorDialog(e).exec_()
             return
+        self.G.add_nodes_from(plot.getNode(graphMatrix))
         self.G.add_weighted_edges_from(plot.getEdge(graphMatrix))
-        self.addNode(plot.getNode(graphMatrix))
+        self.addCombo(plot.getNode(graphMatrix))
         self.plot_graph()
         
     def savePlot(self):
@@ -108,16 +112,19 @@ class MainWindow(QMainWindow):
     def plot_graph(self):
         self.fig.clear()
         global pos
-        pos = nx.spring_layout(self.G)
+        pos = nx.shell_layout(self.G)
         weight = nx.get_edge_attributes(self.G, 'weight')
         nx.set_edge_attributes(self.G, values=1.0, name='zorder')
         nx.draw(self.G, pos=pos, with_labels=True, font_weight='bold', ax=self.fig.add_subplot(111))
         nx.draw_networkx_edge_labels(self.G, pos, weight)
         self.canvas.draw()
         
-    def addNode(self, nodes):
+    def addCombo(self, nodes):
         self.startingCombo.clear()
         self.destinationCombo.clear()
+        self.algorithmCombo.clear()
+        self.algorithmCombo.addItem("Uniform Cost Search")
+        self.algorithmCombo.addItem("A*")
         for node in nodes:
             self.startingCombo.addItem(str(node))
             self.destinationCombo.addItem(str(node))
@@ -125,28 +132,31 @@ class MainWindow(QMainWindow):
     def searchRoute(self):
         matrix = plot.parseFile(filename)
         
-        #Search Solution with UCS
-        ucsearch = ucs.UCS(matrix)
-        urouteSolution, udistanceSolution = ucsearch.search(int(self.startingCombo.currentText()), int(self.destinationCombo.currentText()))
-        
-        #Search Solution with A*
-        graph = a_star.Graph(matrix, int(self.startingCombo.currentText())-1, int(self.destinationCombo.currentText())-1)
-        arouteSolution, adistanceSolution = graph.calculate()
-        
-        #Select solution based on distance
+        getRoute = False
         routeSolution = []
-        if (udistanceSolution < adistanceSolution):
-            routeSolution = urouteSolution
-            distanceSolution = udistanceSolution
+        if self.algorithmCombo.currentIndex() == 0:
+            #Search Solution with UCS
+            ucsearch = ucs.UCS(matrix)
+            routeSolution, distanceSolution = ucsearch.search(int(self.startingCombo.currentText()), int(self.destinationCombo.currentText()))
+            if routeSolution != []:
+                getRoute = True
         else:
-            for node in arouteSolution:
-                routeSolution.append(int(node.label)+1)
-            distanceSolution = adistanceSolution
-        
-        #Print Result                
-        self.visualizeSolution(routeSolution)
-        self.printSolution(routeSolution)
-        self.printDistance(distanceSolution)
+            #Search Solution with A*
+            graph = a_star.Graph(matrix, int(self.startingCombo.currentText())-1, int(self.destinationCombo.currentText())-1)
+            if graph.calculate() != None:
+                arouteSolution, distanceSolution = graph.calculate()
+                getRoute = True
+                for node in arouteSolution:
+                    routeSolution.append(int(node.label)+1)
+
+        if getRoute:
+            #Print Result                
+            self.visualizeSolution(routeSolution)
+            self.printSolution(routeSolution)
+            self.printDistance(distanceSolution)
+        else:
+            self.route.setText("Route: No Solution" )
+            self.distance.setText("Distance: ")
         
     def visualizeSolution(self, solution):
         for u, v in self.G.edges():

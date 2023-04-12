@@ -1,8 +1,3 @@
-# importing networkx
-import networkx as nx
-# importing matplotlib.pyplot
-import matplotlib.pyplot as plt
-
 def parseFile(filename):
     with open(filename) as f:
         matrix = [[float(num) for num in line.split(' ')] for line in f]
@@ -12,15 +7,15 @@ def parseFile(filename):
     return matrix
 
 def getNode(matrix) :
-    nodes = []
-    node = len(matrix)
+    nodes = [i+1 for i in range(len(matrix))]
+    """ node = len(matrix)
     i = 0
     for i in range(node) :
         for w in matrix[i]:
             if w != 0:
                 nodes.append(i+1)
                 break
-        i += 1
+        i += 1 """
     
     return nodes
 
