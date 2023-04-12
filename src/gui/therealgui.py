@@ -1,4 +1,7 @@
 import sys
+
+from PyQt5.QtCore import Qt
+
 sys.path.append('../algorithm')
 
 import networkx as nx
@@ -8,8 +11,26 @@ import ucs
 import a_star
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPushButton, QFileDialog, QComboBox, QLabel
+from PyQt5.QtWidgets import QApplication, QDialog, QMainWindow, QVBoxLayout, QWidget, QPushButton, QFileDialog, QComboBox, QLabel
 from PyQt5 import uic
+
+class ErrorDialog(QDialog):
+    def __init__(self, e):
+        super().__init__()
+        self.setWindowTitle("Error")
+        self.setWindowTitle("Error")
+        self.setFixedSize(300, 50)
+        self.layout = QVBoxLayout()
+
+        message = QLabel("Error: " + str(e))
+        message.setAlignment(Qt.AlignCenter)
+        message2 = QLabel("Please choose a valid file")
+        message2.setAlignment(Qt.AlignCenter)
+
+        self.layout.addWidget(message)
+        self.layout.addWidget(message2)
+        self.setLayout(self.layout)
+        self.show()
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -67,7 +88,11 @@ class MainWindow(QMainWindow):
         
     def visualizePlot(self):
         self.G.clear()
-        graphMatrix = plot.parseFile(filename)
+        try:
+            graphMatrix = plot.parseFile(filename)
+        except Exception as e:
+            ErrorDialog(e).exec_()
+            return
         self.G.add_weighted_edges_from(plot.getEdge(graphMatrix))
         self.addNode(plot.getNode(graphMatrix))
         self.plot_graph()

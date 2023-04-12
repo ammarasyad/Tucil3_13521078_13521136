@@ -4,13 +4,11 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 def parseFile(filename):
-    matrix = []
-    while (not matrix):
-        with open(filename, 'r') as f:
-            for line in f:
-                temp = [float(num) for num in line.split(' ')]
-                matrix.append(temp)
-                
+    with open(filename) as f:
+        matrix = [[float(num) for num in line.split(' ')] for line in f]
+    for i in matrix:
+        if len(i) != len(matrix) or len(i) < 8 or len(matrix) < 8:
+            raise Exception('Matrix must be square and at least 8x8')
     return matrix
 
 def getNode(matrix) :
@@ -19,7 +17,7 @@ def getNode(matrix) :
     i = 0
     for i in range(node) :
         for w in matrix[i]:
-            if (w != 0):
+            if w != 0:
                 nodes.append(i+1)
                 break
         i += 1
@@ -32,7 +30,7 @@ def getEdge(matrix) :
     i = 0
     for i in range(node) :
         for j in range(node) :
-            if (matrix[i][j] > 0) :
+            if matrix[i][j] > 0:
                 edges.append((i+1, j+1, matrix[i][j]))
     
     return edges
