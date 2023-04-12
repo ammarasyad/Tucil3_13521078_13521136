@@ -74,8 +74,10 @@ class MainWindow(QMainWindow):
         
     def plot_graph(self):
         self.fig.clear()
+        global pos
         pos = nx.spring_layout(self.G)
         weight = nx.get_edge_attributes(self.G, 'weight')
+        nx.set_edge_attributes(self.G, values=1.0, name='zorder')
         nx.draw(self.G, pos=pos, with_labels=True, font_weight='bold', ax=self.fig.add_subplot(111))
         nx.draw_networkx_edge_labels(self.G, pos, weight)
         self.canvas.draw()
@@ -91,8 +93,27 @@ class MainWindow(QMainWindow):
         matrix = plot.parseFile(filename)
         ucsearch = ucs.UCS(matrix)
         routeSolution, distanceSolution = ucsearch.search(int(self.startingCombo.currentText()), int(self.destinationCombo.currentText()))
+        self.visualizeSolution(routeSolution)
         self.printSolution(routeSolution)
         self.printDistance(distanceSolution)
+        
+    def visualizeSolution(self, solution):
+        for u, v in self.G.edges():
+            self.G[u][v]['color'] = 'k'
+                
+        i = 0
+        edge_solution = []
+        for i in range(len(solution)-1):
+            edge_solution.append([solution[i], solution[i+1]])
+            
+        self.fig.clear()
+        weight = nx.get_edge_attributes(self.G, 'weight')
+        edge_colors = ['r' if [u,v] in edge_solution else 'k' for u, v in self.G.edges]
+        width = [2 if [u,v] in edge_solution else 1 for u, v in self.G.edges]
+        
+        nx.draw(self.G, pos=pos, with_labels=True, font_weight='bold', ax=self.fig.add_subplot(111), edge_color=edge_colors, width= width)
+        nx.draw_networkx_edge_labels(self.G, pos, weight)
+        self.canvas.draw()
         
     def printSolution(self, solution):
         solStr = ""
