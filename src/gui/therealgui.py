@@ -2,13 +2,11 @@ import sys
 
 from PyQt5.QtCore import Qt
 
-sys.path.append('../algorithm')
-
 import networkx as nx
 import matplotlib.pyplot as plt
 import plot
-import ucs
-import a_star
+import src.algorithm.ucs as ucs
+import src.algorithm.a_star as a_star
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from PyQt5.QtWidgets import QApplication, QDialog, QMainWindow, QVBoxLayout, QWidget, QPushButton, QFileDialog, QComboBox, QLabel

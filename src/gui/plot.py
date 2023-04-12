@@ -1,6 +1,6 @@
 def parseFile(filename):
     with open(filename) as f:
-        matrix = [[float(num) for num in line.split(' ')] for line in f]
+        matrix = [[float(num) for num in line.strip().split(' ')] for line in f]
     for i in matrix:
         if len(i) != len(matrix) or len(i) < 8 or len(matrix) < 8:
             raise Exception('Matrix must be square and at least 8x8')
