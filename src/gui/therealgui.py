@@ -91,8 +91,26 @@ class MainWindow(QMainWindow):
             
     def searchRoute(self):
         matrix = plot.parseFile(filename)
+        
+        #Search Solution with UCS
         ucsearch = ucs.UCS(matrix)
-        routeSolution, distanceSolution = ucsearch.search(int(self.startingCombo.currentText()), int(self.destinationCombo.currentText()))
+        urouteSolution, udistanceSolution = ucsearch.search(int(self.startingCombo.currentText()), int(self.destinationCombo.currentText()))
+        
+        #Search Solution with A*
+        graph = a_star.Graph(matrix, int(self.startingCombo.currentText())-1, int(self.destinationCombo.currentText())-1)
+        arouteSolution, adistanceSolution = graph.calculate()
+        
+        #Select solution based on distance
+        routeSolution = []
+        if (udistanceSolution < adistanceSolution):
+            routeSolution = urouteSolution
+            distanceSolution = udistanceSolution
+        else:
+            for node in arouteSolution:
+                routeSolution.append(int(node.label)+1)
+            distanceSolution = adistanceSolution
+        
+        #Print Result                
         self.visualizeSolution(routeSolution)
         self.printSolution(routeSolution)
         self.printDistance(distanceSolution)
